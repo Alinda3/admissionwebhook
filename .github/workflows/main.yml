@@ -19,8 +19,6 @@ jobs:
       
       - name: install helm
         uses: Azure/setup-helm@v1
-        with:
-          version: ${{ env.HELM_VERSION_TO_INSTALL }}# default is latest
           
       - name: login to acr using helm
         run: |
