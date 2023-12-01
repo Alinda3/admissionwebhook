@@ -52,7 +52,7 @@ jobs:
           
       - name: save helm chart to local registry
         run: |
-          helm chart save ./src/azure-vote-helm-chart/ tsaktest.azurecr.io/helm/something:latest
+          helm chart save ./charts/a-w-nodeselctor/ tsaktest.azurecr.io/helm/something:latest
           
       - name: publish chart to acr
         run: |
