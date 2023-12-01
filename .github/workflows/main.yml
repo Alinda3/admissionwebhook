@@ -8,6 +8,7 @@ env:
   HELM_VERSION_TO_INSTALL: 3.5.0
   ACR_NAME: stylelabsinfra
   ACR_REPO_NAME: helm/test
+  ACR_PUSH_USER: github-admission-webhook
 jobs:
   build:
     name: publish acr
@@ -22,7 +23,7 @@ jobs:
           
       - name: login to acr using helm
         run: |
-          helm registry login $(ACR_NAME).azurecr.io --username $(ACR_PUSH_USER) --password $(ACR_PUSH_TOKEN)
+          helm registry login ${{ env.ACR_NAME }}.azurecr.io --username ${{ env.ACR_PUSH_USER }} --password ${{ vars.ACR_PUSH_TOKEN }}
           
       - name: save helm chart to local registry
         run: |
