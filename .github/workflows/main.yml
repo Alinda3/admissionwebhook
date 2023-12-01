@@ -44,7 +44,7 @@ jobs:
         name: checkout repo
       
       - name: install helm
-        uses: Azure/setup-helm@v1
+        uses: azure/setup-helm@v3
           
       - name: login to acr using helm
         run: |
