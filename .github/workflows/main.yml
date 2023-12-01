@@ -33,7 +33,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ env.ACR_NAME }}.azurecr.io/test:${{ github.sha }}
+        tags: ${{ env.ACR_NAME }}.azurecr.io/admission-webhook-nodeselector:v1.25.0
         file: ./Dockerfile
   build:
     name: build and push helm
@@ -48,11 +48,11 @@ jobs:
           
       - name: login to acr using helm
         run: |
-          helm registry login ${{ env.ACR_NAME }}.azurecr.io --username ${{ env.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }}
+           helm registry login ${{ env.ACR_NAME }}.azurecr.io --username ${{ env.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }}
           
-      - name: save helm chart to local registry
+      - name: package helm
         run: |
-          helm chart save $/src/azure-vote-helm-chart/ $.azurecr.io/$:latest
+          helm chart save $/charts/a-w-nodeselector/ $.azurecr.io/$:latest
           
       - name: publish chart to acr
         run: |
