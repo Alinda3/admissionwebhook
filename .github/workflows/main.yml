@@ -8,7 +8,7 @@ env:
   HELM_VERSION_TO_INSTALL: 3.5.0
   ACR_NAME: tsaktest
   ACR_REPO_NAME: helm/test
-  ACR_PUSH_USER: github-admission-webhook
+  ACR_PUSH_USER: tsaktest
 jobs:
   docker_build_push_acr:
     name: 'Docker Build and Push to ACR'
