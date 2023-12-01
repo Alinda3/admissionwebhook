@@ -1,0 +1,139 @@
+# Default values for a-w-nodeselector.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+ns: a-w-nodeselector
+
+certmanagersetup:
+  name: a-w-certmgr
+  serviceAccountName: a-w-nodeselector
+  image:
+    repository: stylelabsinfra.azurecr.io/admission-webhook-certmgr
+    tag: v1.25.0
+  command: "./generate_certificate.sh"
+  args:
+    - "--service"
+    - "a-w-nodeselector"
+    - "--webhook"
+    - "a-w-nodeselector"
+    - "--secret"
+    - "a-w-nodeselector"
+    - "--namespace"
+    - "a-w-nodeselector" # change it according to the .Values.ns
+  restartPolicy: Never
+  backoffLimit: 0
+
+replicaCount: 1
+
+image:
+  repository: "stylelabsinfra.azurecr.io/admission-webhook-nodeselector"
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v1.25.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# configmap that will holds the nodeselector specification
+cm:
+  name: a-w-nodeselector
+  data: {}
+    # media: |
+    #   test: test
+    # data: |
+    #   test2: test2
+
+environmentVariables:
+  - name: labelToCheck
+    value: service-type
+  - name: cmNamespace
+    value: a-w-nodeselector # should match .Values.ns
+  - name: cmName
+    value: a-w-nodeselector # should match .Values.cm.name
+
+webhook:
+  admissionReviewVersions:
+  - "v1beta1"
+  sideEffects: "None"
+  timeoutSeconds: 30
+  matchLabels: 
+    mutation-webhook-nodeselector: "enabled"
+  path: "/mutate"
+  rules:
+    - operations: [ "CREATE", "UPDATE" ]
+      apiGroups: ["apps"]
+      apiVersions: ["v1"]
+      resources: ["deployments"]
+
+webhooktlscerts:
+  name: a-w-nodeselector
+  path: /etc/webhook/certs/
+  readOnly: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "a-w-api"
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
