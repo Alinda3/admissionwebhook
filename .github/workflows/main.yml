@@ -33,7 +33,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        file: ./api/Dockerfile
+        file: ./Dockerfile
   build:
     name: build and push helm
     runs-on: ubuntu-latest
