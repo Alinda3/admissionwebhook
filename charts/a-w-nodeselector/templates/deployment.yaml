@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "a-w-nodeselector.fullname" . }}
+  namespace: {{ .Values.ns }}
+  labels:
+    {{- include "a-w-nodeselector.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "a-w-nodeselector.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "a-w-nodeselector.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        {{- range .Values.environmentVariables }}
+          - name: {{ .name }}
+            value: {{ .value | quote }}
+        {{- end }}
+        ports:
+        - containerPort: 8443
+          name: tls
+        - containerPort: 80
+          name: metrics
+        volumeMounts:
+        - name: {{ .Values.webhooktlscerts.name }}
+          mountPath: {{ .Values.webhooktlscerts.path }}
+          readOnly: {{ .Values.webhooktlscerts.readOnly }}
+      volumes:
+      - name: {{ .Values.webhooktlscerts.name }}
+        secret:
+          secretName: {{ .Values.webhooktlscerts.name }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

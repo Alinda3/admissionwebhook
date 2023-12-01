@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.ns }}
+  labels:
+    {{- include "a-w-nodeselector.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.ns }}
+  labels:
+    {{- include "a-w-nodeselector.labels" . | nindent 4 }}
+rules:
+  - apiGroups: 
+    - admissionregistration.k8s.io
+    resources:
+    - mutatingwebhookconfigurations
+    verbs: 
+    - get
+    - create
+    - patch
+  - apiGroups: 
+    - certificates.k8s.io
+    resources: 
+    - certificatesigningrequests
+    - certificatesigningrequests/approval
+    verbs: 
+    - create
+    - get
+    - delete
+    - update
+    - approve
+  - apiGroups:
+    - certificates.k8s.io
+    resources:
+    - signers
+    resourceNames:
+    - kubernetes.io/kubelet-serving
+    verbs:
+    - approve
+  - apiGroups: [""]
+    resources: 
+    - secrets
+    verbs:
+    - create
+    - get
+    - patch
+    - update
+  - apiGroups: [""]
+    resources:
+    - configmaps
+    verbs: 
+    - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.ns }}
+  labels:
+    {{- include "a-w-nodeselector.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Chart.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}
+    namespace: {{ .Values.ns }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.certmanagersetup.name}}
+  namespace: {{ .Values.ns }}
+  labels:
+    {{- include "a-w-nodeselector.labels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      namespace: {{ .Values.ns }}
+    spec:
+      serviceAccountName: {{ .Values.certmanagersetup.serviceAccountName}}
+      containers:
+      - name: {{ .Values.certmanagersetup.name}}
+        image: "{{ .Values.certmanagersetup.image.repository}}:{{ .Values.certmanagersetup.image.tag}}"
+        command: [{{ .Values.certmanagersetup.command}}]
+        imagePullPolicy: Always
+        args:
+          {{- range .Values.certmanagersetup.args }}
+          - "{{ . }}"
+          {{- end }}
+      restartPolicy: {{ .Values.certmanagersetup.restartPolicy}}
+  backoffLimit: {{ .Values.certmanagersetup.backoffLimit}}

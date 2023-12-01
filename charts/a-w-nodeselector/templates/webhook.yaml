@@ -1,0 +1,16 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "a-w-nodeselector.fullname" . }}
+webhooks:
+  - name: "{{ include "a-w-nodeselector.fullname" . }}.{{ .Values.ns }}.svc.cluster.local"
+    admissionReviewVersions: {{ .Values.webhook.admissionReviewVersions }}
+    sideEffects: {{ .Values.webhook.sideEffects }}
+    timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
+    clientConfig:
+      service:
+        name: {{ include "a-w-nodeselector.fullname" . }}
+        namespace: {{ .Values.ns }}
+        path: {{ .Values.webhook.path }}
+    rules:
+    {{- toYaml .Values.webhook.rules | nindent 6 }}
