@@ -52,8 +52,9 @@ jobs:
           
       - name: save helm chart to local registry
         run: |
-          helm chart save ./charts/a-w-nodeselctor/ tsaktest.azurecr.io/helm/something:latest
+          helm package ./charts/a-w-nodeselector --version 0.1.0
+          helm push a-w-nodeselector-0.1.0.tgz oci://tsaktest.azurecr.io/helm/admission-webhook
           
-      - name: publish chart to acr
-        run: |
-            helm chart push tsaktest.azurecr.io/helm/something:latest
+      # - name: publish chart to acr
+      #   run: |
+      #       helm push <chart-package.tgz> oci://tsaktest.azurecr.io/helm/admission-webhook
