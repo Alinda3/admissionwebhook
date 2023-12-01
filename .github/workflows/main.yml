@@ -23,7 +23,7 @@ jobs:
           
       - name: login to acr using helm
         run: |
-          helm registry login ${{ env.ACR_NAME }}.azurecr.io --username ${{ env.ACR_PUSH_USER }} --password ${{ vars.ACR_PUSH_TOKEN }}
+          helm registry login ${{ env.ACR_NAME }}.azurecr.io --username ${{ env.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }}
           
       - name: save helm chart to local registry
         run: |
