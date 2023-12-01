@@ -33,7 +33,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: latest
+        tags: ${{ env.ACR_NAME }}.azurecr.io/test:${{ github.sha }}
         file: ./Dockerfile
   build:
     name: build and push helm
