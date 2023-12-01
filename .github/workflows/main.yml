@@ -9,7 +9,9 @@ env:
   ACR_NAME: tsaktest
   ACR_REPO_NAME: admission-webhook-nodeselector
   ACR_PUSH_USER: tsaktest
-  NODESELECTOR_TAG: v1.25.0
+  DOCKER_TAG: v1.25.0
+  HELM_TAG: 0.1.0
+  
 jobs:
   docker_build_push_acr:
     name: 'Docker Build and Push to ACR'
@@ -27,14 +29,14 @@ jobs:
       uses: azure/docker-login@v1
       with:
         login-server: ${{ env.ACR_NAME }}.azurecr.io
-        username: ${{ ACR_PUSH_USER }}
+        username: ${{ env.ACR_PUSH_USER }}
         password: ${{ secrets.ACR_PUSH_TOKEN }}
  
     - name: Build the frontend image and push it to ACR
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ env.ACR_NAME }}.azurecr.io/${{ env.ACR_REPO_NAME }}:${{ env.NODESELECTOR_TAG }}
+        tags: ${{ env.ACR_NAME }}.azurecr.io/${{ env.ACR_REPO_NAME }}:${{ env.DOCKER_TAG }}
         file: ./Dockerfile
   build:
     name: build and push helm
@@ -54,5 +56,5 @@ jobs:
           
       - name: build and push helm chart
         run: |
-          helm package ./charts/a-w-nodeselector --version 0.1.0
-          helm push a-w-nodeselector-0.1.0.tgz oci://tsaktest.azurecr.io/helm/admission-webhook
+          helm package ./charts/a-w-nodeselector --version ${{ env.HELM_TAG}}
+          helm push a-w-nodeselector-${{ env.HELM_TAG}}.tgz oci://${{ env.ACR_NAME }}.azurecr.io/helm/admission-webhook
