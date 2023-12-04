@@ -1,16 +1,17 @@
 name: main
 
 on: 
-  pull_request:
-    types:
-      - closed
+  push:
+    branches:    
+      - main
+    tags:
+      - '*'
 
 env:
   ACR_NAME: tsaktest
   ACR_REPO_NAME: admission-webhook-nodeselector
   ACR_PUSH_USER: tsaktest
   DOCKER_TAG: v1.25.0
-  HELM_TAG: 0.1.0
   
 jobs:
   docker_build_push_acr:
@@ -56,5 +57,5 @@ jobs:
           
       - name: build and push helm chart
         run: |
-          helm package ./charts/a-w-nodeselector --version ${{ env.HELM_TAG}}
-          helm push a-w-nodeselector-${{ env.HELM_TAG}}.tgz oci://${{ env.ACR_NAME }}.azurecr.io/helm/admission-webhook
+          helm package ./charts/a-w-nodeselector --version ${{ github.ref_name }}
+          helm push a-w-nodeselector-${{ github.ref_name }}.tgz oci://${{ env.ACR_NAME }}.azurecr.io/helm/admission-webhook
